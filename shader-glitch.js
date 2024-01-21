@@ -4,10 +4,10 @@
 
 AFRAME.registerShader('grid-glitch', {
     schema: {
-      
+  
       timeMsec: { type: 'time', is: 'uniform' },
-      
-      offset: { type: 'float', is: 'uniform' }
+  
+      id: { type: 'float', is: 'uniform' }
     },
   
     vertexShader: `
@@ -26,7 +26,7 @@ AFRAME.registerShader('grid-glitch', {
   uniform float timeMsec;
    float resX = 2.;
    float resY = 2.;
-  uniform float offset;
+  uniform float id;
   
   
   ///////////////////////////////////////////////////////////////////
@@ -163,6 +163,19 @@ AFRAME.registerShader('grid-glitch', {
       );
   }
   
+  ///////////////////////////////////////////////////////////////////
+  //
+  float fbm(vec3 x) {
+    float v = 0.0;
+    float a = .5;
+    vec3 shift = vec3(100.);
+    for (int i = 0; i < 4; ++i) {
+      v += a * snoise(x);
+      x = x * 2.0 + shift;
+      a *= 0.5;
+    }
+    return v;
+  }
   
   
   ////////////////////////////////////////////////////////////////////
@@ -171,14 +184,17 @@ AFRAME.registerShader('grid-glitch', {
   
   void main()
   {
-      float uTime = timeMsec / 9000.0; 
+      float uTime = timeMsec / 20000.0; 
+      float offset = id * 0.5;
       vec3 uvColor=vec3(vUv,1.);
-      float strength = step(0., snoise(vec3(vUv.x * resX , vUv.y*resY,  uTime + offset )));
+     // float strength = step(0., snoise(vec3(vUv.x * resX , vUv.y*resY,  uTime + offset )));
+  
+      float strength = step(0., fbm(vec3(vUv.x * resX , vUv.y*resY,  uTime + offset )));
       //strength +=  1.0 - abs(snoise(vec3(vUv.x * resX*1.,vUv.y*resY*1., uTime + offset ))); // cheap caustics
   
   
     float lineWidth = 0.01;
-    float alpha = 0.2;
+    float alpha = 0.25;
     
     if(vUv.x < lineWidth){
      strength = 1.;

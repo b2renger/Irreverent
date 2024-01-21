@@ -4,10 +4,9 @@
 
 AFRAME.registerShader('grid-glitch', {
     schema: {
-      color: { type: 'color', is: 'uniform' },
+      
       timeMsec: { type: 'time', is: 'uniform' },
-      resX: { type: 'float', is: 'uniform' },
-      resY: { type: 'float', is: 'uniform' },
+      
       offset: { type: 'float', is: 'uniform' }
     },
   
@@ -25,8 +24,8 @@ AFRAME.registerShader('grid-glitch', {
   
   varying vec2 vUv;
   uniform float timeMsec;
-  uniform float resX;
-  uniform float resY;
+   float resX = 2.;
+   float resY = 2.;
   uniform float offset;
   
   
@@ -168,37 +167,42 @@ AFRAME.registerShader('grid-glitch', {
   
   ////////////////////////////////////////////////////////////////////
   // main
-  vec3 blackColor=vec3(1.0);
+  
   
   void main()
   {
-      float uTime = timeMsec / 8000.0; 
+      float uTime = timeMsec / 9000.0; 
       vec3 uvColor=vec3(vUv,1.);
       float strength = step(0., snoise(vec3(vUv.x * resX , vUv.y*resY,  uTime + offset )));
+      //strength +=  1.0 - abs(snoise(vec3(vUv.x * resX*1.,vUv.y*resY*1., uTime + offset ))); // cheap caustics
   
   
-  
-    float lineWidth = 0.005;
-    if(vUv.x < lineWidth){
-     strength += 1.;
-    }
+    float lineWidth = 0.01;
+    float alpha = 0.2;
     
-    if(vUv.x > (1. - lineWidth)){
-     strength += 1.;
+    if(vUv.x < lineWidth){
+     strength = 1.;
+     alpha =1.;
     }
-  
-  
+    if(vUv.x > (1. - lineWidth)){
+     strength = 1.;
+     alpha =1.;
+    }
     if(vUv.y < lineWidth){
-     strength += 1.;
+     strength = 1.;
+     alpha =1.;
     }
     if(vUv.y > (1.- lineWidth)){
-     strength += 1.;
+     strength = 1.;
+     alpha =1.;
     }
-  
+    if (strength == 0.0){
+      alpha = 0.;
+    }
     
-   vec3 mixedColor=mix(blackColor,vec3(1.),strength);
+   
       
-      gl_FragColor=vec4(mixedColor, strength*0.8 );
+      gl_FragColor=vec4(vec3(strength), alpha );
   }
     
   `

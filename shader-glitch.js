@@ -174,15 +174,31 @@ AFRAME.registerShader('grid-glitch', {
   {
       float uTime = timeMsec / 8000.0; 
       vec3 uvColor=vec3(vUv,1.);
-      float strength = (0., snoise(vec3(vUv.x * resX , vUv.y*resY,  uTime + offset )));
+      float strength = step(0., snoise(vec3(vUv.x * resX , vUv.y*resY,  uTime + offset )));
   
   
   
-      vec3 mixedColor=mix(blackColor,vec3(1.),strength);
-    //  vec3 mixedColor = vec3(1.0*strength, 0.0, 0.);
+    float lineWidth = 0.005;
+    if(vUv.x < lineWidth){
+     strength += 1.;
+    }
+    
+    if(vUv.x > (1. - lineWidth)){
+     strength += 1.;
+    }
   
+  
+    if(vUv.y < lineWidth){
+     strength += 1.;
+    }
+    if(vUv.y > (1.- lineWidth)){
+     strength += 1.;
+    }
+  
+    
+   vec3 mixedColor=mix(blackColor,vec3(1.),strength);
       
-      gl_FragColor=vec4(mixedColor,pow(strength/2., .5)  );
+      gl_FragColor=vec4(mixedColor, strength*0.8 );
   }
     
   `
